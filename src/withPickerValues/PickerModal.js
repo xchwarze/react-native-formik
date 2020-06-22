@@ -1,6 +1,6 @@
 // @flow
 import React, { PureComponent } from "react";
-import { View, Platform, Picker } from "react-native";
+import { View, Platform, Picker, Button } from "react-native";
 
 import KeyboardModal from "./KeyboardModal";
 import DisableKeyboard from "./DisableKeyboard";
@@ -16,16 +16,25 @@ class PickerModal extends PureComponent<PropsType> {
     if (this.pickerModal) this.pickerModal.open();
   };
 
+  closePicker = () => {
+    if (this.pickerModal) this.pickerModal.close();
+  };
+
   onValueChange = (value: any) => {
     if (this.props.onChangeText) this.props.onChangeText(value);
     if (this.props.onSubmitEditing) this.props.onSubmitEditing();
   };
 
   renderPicker = () => {
-    const { placeholder, value } = this.props;
+    const {
+      placeholder,
+      value,
+      activePlaceholder = false,
+      enabled = true
+    } = this.props;
     if (!this.props.values || !this.props.values.length) return null;
     const values = [...this.props.values];
-    if (Platform.OS === "ios") {
+    if (Platform.OS === "ios" || activePlaceholder) {
       values.unshift({ value: "", label: placeholder || "" });
     } else {
       // Fix for issue: https://github.com/facebook/react-native/issues/15556
@@ -36,6 +45,7 @@ class PickerModal extends PureComponent<PropsType> {
         onValueChange={this.onValueChange}
         selectedValue={value}
         prompt={placeholder}
+        enabled={enabled}
       >
         {values.map(item => (
           <Picker.Item key={item.value} {...item} />
@@ -49,6 +59,9 @@ class PickerModal extends PureComponent<PropsType> {
           this.pickerModal = ref;
         }}
       >
+        <View style={{ alignItems: "flex-end", marginRight: 12 }}>
+          <Button title={"Done"} onPress={this.closePicker} />
+        </View>
         {picker}
       </KeyboardModal>
     ) : (
